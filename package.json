@@ -9,6 +9,7 @@
   "scripts": {
     "build": "prisma generate && nest build",
     "seed": "tsx prisma/seed.ts",
+    "postdeploy": "npx prisma db seed",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
     "start:dev": "nest start --watch",
