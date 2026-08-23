@@ -8,7 +8,12 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   const configService = app.get(ConfigService);
-  app.enableCors({ origin: configService.get<string>('FRONTEND_URL', 'http://localhost:3000') });
+  app.enableCors({
+    origin: (origin, callback) => {
+      callback(null, true); // Permissive CORS for seamless deployment connections
+    },
+    credentials: true,
+  });
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
@@ -18,7 +23,7 @@ async function bootstrap() {
   );
 
   const config = new DocumentBuilder()
-    .setTitle('SHE Leads Impact Dashboard API')
+    .setTitle('ECO GIRLS COLLECTIVE Impact Dashboard API')
     .setDescription('API for managing participants, schools, cleanups, inventory, clubs, and reports')
     .setVersion('1.0')
     .addBearerAuth()

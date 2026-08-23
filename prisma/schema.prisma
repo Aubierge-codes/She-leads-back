@@ -1,4 +1,4 @@
-// SHE Leads Impact Dashboard - Prisma schema
+// ECO GIRLS COLLECTIVE Impact Dashboard - Prisma schema
 // https://pris.ly/d/prisma-schema
 
 generator client {

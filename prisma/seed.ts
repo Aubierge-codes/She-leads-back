@@ -7,7 +7,7 @@ const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
 const prisma = new PrismaClient({ adapter });
 
 async function main() {
-  const email = process.env.SEED_ADMIN_EMAIL ?? 'admin@sheleads.org';
+  const email = process.env.SEED_ADMIN_EMAIL ?? 'admin@ecogirlscollective.org';
   const password = process.env.SEED_ADMIN_PASSWORD ?? 'ChangeMe123!';
 
   const existing = await prisma.user.findUnique({ where: { email } });
@@ -21,7 +21,7 @@ async function main() {
     data: { email, password: hashed, name: 'Default Admin', role: Role.ADMIN },
   });
 
-  console.log(`Seeded admin user: ${email} / ${password}`);
+  console.log(`Seeded admin user: ${email}`);
 }
 
 main()
