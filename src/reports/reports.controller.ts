@@ -1,20 +1,18 @@
-import {  Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
 import { ReportsService } from './reports.service';
 import { CreateReportDto } from './dto/create-report.dto';
 import { UpdateReportDto } from './dto/update-report.dto';
 import { UpdateReportStatusDto } from './dto/update-report-status.dto';
-import { CurrentUser } from '../common/decorators/current-user.decorator';
 
 @ApiTags('reports')
-@ApiBearerAuth()
 @Controller('reports')
 export class ReportsController {
   constructor(private readonly reportsService: ReportsService) {}
 
   @Post()
-  create(@Body() dto: CreateReportDto, @CurrentUser() user: { id: string }) {
-    return this.reportsService.create(dto, user?.id);
+  create(@Body() dto: CreateReportDto) {
+    return this.reportsService.create(dto);
   }
 
   @Get()

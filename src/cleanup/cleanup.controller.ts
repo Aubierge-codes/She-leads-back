@@ -1,5 +1,5 @@
-import {  Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
 import { CleanupService } from './cleanup.service';
 import { CreateCleanupEventDto } from './dto/create-cleanup-event.dto';
 import { UpdateCleanupEventDto } from './dto/update-cleanup-event.dto';
@@ -7,7 +7,6 @@ import { MarkAttendanceDto } from './dto/mark-attendance.dto';
 import { CreateWasteRecordDto } from './dto/create-waste-record.dto';
 
 @ApiTags('cleanup')
-@ApiBearerAuth()
 @Controller('cleanup/events')
 export class CleanupController {
   constructor(private readonly cleanupService: CleanupService) {}

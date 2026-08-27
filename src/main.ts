@@ -26,7 +26,6 @@ async function bootstrap() {
     .setTitle('ECO GIRLS COLLECTIVE Impact Dashboard API')
     .setDescription('API for managing participants, schools, cleanups, inventory, clubs, and reports')
     .setVersion('1.0')
-    .addBearerAuth()
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
