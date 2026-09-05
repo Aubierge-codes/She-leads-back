@@ -48,4 +48,13 @@ export class AnalyticsService {
     });
     return grouped.map((g) => ({ status: g.status, count: g._count._all }));
   }
+
+  async donationsByStatus() {
+    const grouped = await this.prisma.donation.groupBy({
+      by: ['status'],
+      _sum: { amount: true },
+      _count: { _all: true },
+    });
+    return grouped.map((g) => ({ status: g.status, totalAmount: g._sum.amount ?? 0, count: g._count._all }));
+  }
 }

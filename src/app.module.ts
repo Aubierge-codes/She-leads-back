@@ -13,6 +13,7 @@ import { ClubsModule } from './clubs/clubs.module';
 import { ReportsModule } from './reports/reports.module';
 import { AnalyticsModule } from './analytics/analytics.module';
 import { DashboardModule } from './dashboard/dashboard.module';
+import { DonationsModule } from './donations/donations.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { DashboardModule } from './dashboard/dashboard.module';
     InventoryModule,
     ClubsModule,
     ReportsModule,
+    DonationsModule,
     AnalyticsModule,
     DashboardModule,
   ],

@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { DonationStatus } from '../../generated/prisma/client';
 
 @Injectable()
 export class DashboardService {
@@ -16,6 +17,7 @@ export class DashboardService {
       pendingReportsCount,
       wasteAggregate,
       inventoryItems,
+      donationsAggregate,
     ] = await Promise.all([
       this.prisma.participant.count(),
       this.prisma.school.count(),
@@ -28,6 +30,10 @@ export class DashboardService {
       this.prisma.weeklyReport.count({ where: { status: 'SUBMITTED' } }),
       this.prisma.wasteRecord.aggregate({ _sum: { weightKg: true, bags: true } }),
       this.prisma.inventoryItem.findMany(),
+      this.prisma.donation.aggregate({
+        _sum: { amount: true },
+        where: { status: DonationStatus.COMPLETED },
+      }),
     ]);
 
     const lowStockCount = inventoryItems.filter((item) => item.quantity <= item.minimumStock).length;
@@ -43,6 +49,7 @@ export class DashboardService {
       totalWasteWeightKg: wasteAggregate._sum.weightKg ?? 0,
       totalWasteBags: wasteAggregate._sum.bags ?? 0,
       lowStockItemsCount: lowStockCount,
+      donationsRaised: donationsAggregate._sum.amount ?? 0,
     };
   }
 

@@ -31,4 +31,9 @@ export class AnalyticsController {
   reportsByStatus() {
     return this.analyticsService.reportsByStatus();
   }
+
+  @Get('donations-by-status')
+  donationsByStatus() {
+    return this.analyticsService.donationsByStatus();
+  }
 }

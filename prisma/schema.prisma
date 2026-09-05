@@ -59,6 +59,18 @@ enum ReportStatus {
   REJECTED
 }
 
+enum DonationFrequency {
+  ONE_TIME
+  MONTHLY
+}
+
+enum DonationStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  REFUNDED
+}
+
 // ---------- Core ----------
 
 model User {
@@ -248,4 +260,36 @@ model WeeklyReport {
 
   @@unique([schoolId, weekNumber, year])
   @@map("weekly_reports")
+}
+
+// ---------- Donations ----------
+
+model Donor {
+  id        String   @id @default(uuid())
+  name      String
+  email     String   @unique
+  phone     String?
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  donations Donation[]
+
+  @@map("donors")
+}
+
+model Donation {
+  id        String            @id @default(uuid())
+  donorId   String            @map("donor_id")
+  amount    Float
+  currency  String            @default("USD")
+  frequency DonationFrequency @default(ONE_TIME)
+  status    DonationStatus    @default(PENDING)
+  message   String?
+  createdAt DateTime          @default(now()) @map("created_at")
+  updatedAt DateTime          @updatedAt @map("updated_at")
+
+  donor Donor @relation(fields: [donorId], references: [id], onDelete: Cascade)
+
+  @@map("donations")
 }
