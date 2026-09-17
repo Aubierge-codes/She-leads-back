@@ -71,6 +71,12 @@ enum DonationStatus {
   REFUNDED
 }
 
+enum PartnershipInquiryStatus {
+  NEW
+  CONTACTED
+  CLOSED
+}
+
 // ---------- Core ----------
 
 model User {
@@ -292,4 +298,32 @@ model Donation {
   donor Donor @relation(fields: [donorId], references: [id], onDelete: Cascade)
 
   @@map("donations")
+}
+
+// ---------- Newsletter ----------
+
+model NewsletterSubscriber {
+  id        String    @id @default(uuid())
+  email     String    @unique
+  createdAt DateTime  @default(now()) @map("created_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  @@map("newsletter_subscribers")
+}
+
+// ---------- Partnerships ----------
+
+model PartnershipInquiry {
+  id               String                   @id @default(uuid())
+  organizationName String                   @map("organization_name")
+  contactName      String                   @map("contact_name")
+  email            String
+  phone            String?
+  message          String?
+  status           PartnershipInquiryStatus @default(NEW)
+  createdAt        DateTime                 @default(now()) @map("created_at")
+  updatedAt        DateTime                 @updatedAt @map("updated_at")
+  deletedAt        DateTime?                @map("deleted_at")
+
+  @@map("partnership_inquiries")
 }
