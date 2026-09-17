@@ -14,6 +14,8 @@ import { ReportsModule } from './reports/reports.module';
 import { AnalyticsModule } from './analytics/analytics.module';
 import { DashboardModule } from './dashboard/dashboard.module';
 import { DonationsModule } from './donations/donations.module';
+import { NewsletterModule } from './newsletter/newsletter.module';
+import { PartnershipsModule } from './partnerships/partnerships.module';
 
 @Module({
   imports: [
@@ -28,6 +30,8 @@ import { DonationsModule } from './donations/donations.module';
     ClubsModule,
     ReportsModule,
     DonationsModule,
+    NewsletterModule,
+    PartnershipsModule,
     AnalyticsModule,
     DashboardModule,
   ],
