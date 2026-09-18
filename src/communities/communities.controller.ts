@@ -1,10 +1,20 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+} from '@nestjs/common';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { CommunitiesService } from './communities.service';
 import { CreateCommunityDto } from './dto/create-community.dto';
 import { UpdateCommunityDto } from './dto/update-community.dto';
+import { Public } from '../common/decorators/public.decorator';
 
 @ApiTags('communities')
+@ApiBearerAuth()
 @Controller('communities')
 export class CommunitiesController {
   constructor(private readonly communitiesService: CommunitiesService) {}
@@ -14,6 +24,7 @@ export class CommunitiesController {
     return this.communitiesService.create(dto);
   }
 
+  @Public()
   @Get()
   findAll() {
     return this.communitiesService.findAll();
