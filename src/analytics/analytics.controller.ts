@@ -1,17 +1,21 @@
 import { Controller, Get } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { AnalyticsService } from './analytics.service';
+import { Public } from '../common/decorators/public.decorator';
 
 @ApiTags('analytics')
+@ApiBearerAuth()
 @Controller('analytics')
 export class AnalyticsController {
   constructor(private readonly analyticsService: AnalyticsService) {}
 
+  @Public()
   @Get('waste-by-type')
   wasteByType() {
     return this.analyticsService.wasteByType();
   }
 
+  @Public()
   @Get('participants-by-status')
   participantsByStatus() {
     return this.analyticsService.participantsByStatus();
