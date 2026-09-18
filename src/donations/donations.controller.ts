@@ -1,14 +1,17 @@
 import { Body, Controller, Get, Param, Patch, Post } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { DonationsService } from './donations.service';
 import { CreateDonationDto } from './dto/create-donation.dto';
 import { UpdateDonationStatusDto } from './dto/update-donation-status.dto';
+import { Public } from '../common/decorators/public.decorator';
 
 @ApiTags('donations')
+@ApiBearerAuth()
 @Controller('donations')
 export class DonationsController {
   constructor(private readonly donationsService: DonationsService) {}
 
+  @Public()
   @Post()
   create(@Body() dto: CreateDonationDto) {
     return this.donationsService.create(dto);
