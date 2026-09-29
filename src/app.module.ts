@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
+import { ThrottlerModule } from '@nestjs/throttler';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { PrismaModule } from './prisma/prisma.module';
@@ -20,10 +21,19 @@ import { DashboardModule } from './dashboard/dashboard.module';
 import { DonationsModule } from './donations/donations.module';
 import { NewsletterModule } from './newsletter/newsletter.module';
 import { PartnershipsModule } from './partnerships/partnerships.module';
+import { PublicModule } from './public/public.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
+    // Limits are only enforced where ThrottlerGuard is applied (the login
+    // route). LOGIN_RATE_LIMIT = attempts per minute per IP address.
+    ThrottlerModule.forRootAsync({
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => [
+        { ttl: 60_000, limit: Number(config.get('LOGIN_RATE_LIMIT') ?? 10) },
+      ],
+    }),
     PrismaModule,
     AuthModule,
     UsersModule,
@@ -37,6 +47,7 @@ import { PartnershipsModule } from './partnerships/partnerships.module';
     DonationsModule,
     NewsletterModule,
     PartnershipsModule,
+    PublicModule,
     AnalyticsModule,
     DashboardModule,
   ],
