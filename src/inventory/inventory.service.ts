@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateInventoryItemDto } from './dto/create-inventory-item.dto';
 import { UpdateInventoryItemDto } from './dto/update-inventory-item.dto';
@@ -14,11 +18,15 @@ export class InventoryService {
   }
 
   findAll() {
-    return this.prisma.inventoryItem.findMany({ orderBy: { name: 'asc' } });
+    return this.prisma.inventoryItem.findMany({
+      where: { deletedAt: null },
+      orderBy: { name: 'asc' },
+    });
   }
 
   async findOne(id: string) {
-    const item = await this.prisma.inventoryItem.findFirst({ where: { id, deletedAt: null },
+    const item = await this.prisma.inventoryItem.findFirst({
+      where: { id, deletedAt: null },
       include: { transactions: { orderBy: { createdAt: 'desc' }, take: 20 } },
     });
     if (!item) {
@@ -34,11 +42,18 @@ export class InventoryService {
 
   async remove(id: string) {
     await this.getItemOrThrow(id);
-    await this.prisma.inventoryItem.update({ where: { id }, data: { deletedAt: new Date() } });
+    await this.prisma.inventoryItem.update({
+      where: { id },
+      data: { deletedAt: new Date() },
+    });
     return { id };
   }
 
-  async recordTransaction(itemId: string, dto: CreateInventoryTransactionDto, performedById?: string) {
+  async recordTransaction(
+    itemId: string,
+    dto: CreateInventoryTransactionDto,
+    performedById?: string,
+  ) {
     const item = await this.getItemOrThrow(itemId);
 
     let newQuantity: number;
@@ -47,14 +62,19 @@ export class InventoryService {
     } else if (dto.type === InventoryTransactionType.USAGE) {
       newQuantity = item.quantity - dto.quantity;
       if (newQuantity < 0) {
-        throw new BadRequestException('Insufficient stock for this usage transaction');
+        throw new BadRequestException(
+          'Insufficient stock for this usage transaction',
+        );
       }
     } else {
       newQuantity = dto.quantity;
     }
 
     const [, transaction] = await this.prisma.$transaction([
-      this.prisma.inventoryItem.update({ where: { id: itemId }, data: { quantity: newQuantity } }),
+      this.prisma.inventoryItem.update({
+        where: { id: itemId },
+        data: { quantity: newQuantity },
+      }),
       this.prisma.inventoryTransaction.create({
         data: { ...dto, itemId, performedById },
       }),
@@ -64,12 +84,14 @@ export class InventoryService {
   }
 
   async listLowStock() {
-    const items = await this.prisma.inventoryItem.findMany({ orderBy: { name: 'asc' } });
+    const items = await this.findAll();
     return items.filter((item) => item.quantity <= item.minimumStock);
   }
 
   private async getItemOrThrow(id: string) {
-    const item = await this.prisma.inventoryItem.findFirst({ where: { id, deletedAt: null } });
+    const item = await this.prisma.inventoryItem.findFirst({
+      where: { id, deletedAt: null },
+    });
     if (!item) {
       throw new NotFoundException(`Inventory item ${id} not found`);
     }
@@ -77,7 +99,9 @@ export class InventoryService {
   }
 
   async restore(id: string) {
-
-    return this.prisma.inventoryItem.update({ where: { id }, data: { deletedAt: null } });
+    return this.prisma.inventoryItem.update({
+      where: { id },
+      data: { deletedAt: null },
+    });
   }
 }
