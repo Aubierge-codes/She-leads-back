@@ -1,4 +1,8 @@
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -11,7 +15,9 @@ export class UsersService {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(dto: CreateUserDto) {
-    const existing = await this.prisma.user.findUnique({ where: { email: dto.email } });
+    const existing = await this.prisma.user.findUnique({
+      where: { email: dto.email },
+    });
     if (existing) {
       throw new ConflictException('A user with this email already exists');
     }
@@ -24,12 +30,17 @@ export class UsersService {
   }
 
   async findAll() {
-    const users = await this.prisma.user.findMany({ orderBy: { createdAt: 'desc' } });
+    const users = await this.prisma.user.findMany({
+      where: { deletedAt: null },
+      orderBy: { createdAt: 'desc' },
+    });
     return users.map((user) => this.sanitize(user));
   }
 
   async findOne(id: string) {
-    const user = await this.prisma.user.findFirst({ where: { id, deletedAt: null } });
+    const user = await this.prisma.user.findFirst({
+      where: { id, deletedAt: null },
+    });
     if (!user) {
       throw new NotFoundException(`User ${id} not found`);
     }
@@ -37,7 +48,15 @@ export class UsersService {
   }
 
   findByEmail(email: string) {
-    return this.prisma.user.findUnique({ where: { email } });
+    return this.prisma.user.findFirst({ where: { email, deletedAt: null } });
+  }
+
+  async changePassword(id: string, newPassword: string) {
+    const hashed = await bcrypt.hash(newPassword, SALT_ROUNDS);
+    await this.prisma.user.update({
+      where: { id },
+      data: { password: hashed },
+    });
   }
 
   async update(id: string, dto: UpdateUserDto) {
@@ -48,17 +67,23 @@ export class UsersService {
 
   async remove(id: string) {
     await this.findOne(id);
-    await this.prisma.user.update({ where: { id }, data: { deletedAt: new Date() } });
+    await this.prisma.user.update({
+      where: { id },
+      data: { deletedAt: new Date() },
+    });
     return { id };
   }
 
   private sanitize(user: { password: string; [key: string]: unknown }) {
-    const { password: _password, ...rest } = user;
+    const rest: Record<string, unknown> = { ...user };
+    delete rest.password;
     return rest;
   }
 
   async restore(id: string) {
-
-    return this.prisma.user.update({ where: { id }, data: { deletedAt: null } });
+    return this.prisma.user.update({
+      where: { id },
+      data: { deletedAt: null },
+    });
   }
 }
