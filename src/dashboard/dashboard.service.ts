@@ -19,24 +19,35 @@ export class DashboardService {
       inventoryItems,
       donationsAggregate,
     ] = await Promise.all([
-      this.prisma.participant.count(),
-      this.prisma.school.count(),
-      this.prisma.community.count(),
-      this.prisma.cleanupEvent.count(),
+      this.prisma.participant.count({ where: { deletedAt: null } }),
+      this.prisma.school.count({ where: { deletedAt: null } }),
+      this.prisma.community.count({ where: { deletedAt: null } }),
+      this.prisma.cleanupEvent.count({ where: { deletedAt: null } }),
       this.prisma.cleanupEvent.count({
-        where: { status: { in: ['PLANNED', 'ONGOING'] }, eventDate: { gte: new Date() } },
+        where: {
+          deletedAt: null,
+          status: { in: ['PLANNED', 'ONGOING'] },
+          eventDate: { gte: new Date() },
+        },
       }),
-      this.prisma.environmentalClub.count(),
-      this.prisma.weeklyReport.count({ where: { status: 'SUBMITTED' } }),
-      this.prisma.wasteRecord.aggregate({ _sum: { weightKg: true, bags: true } }),
-      this.prisma.inventoryItem.findMany(),
+      this.prisma.environmentalClub.count({ where: { deletedAt: null } }),
+      this.prisma.weeklyReport.count({
+        where: { deletedAt: null, status: 'SUBMITTED' },
+      }),
+      this.prisma.wasteRecord.aggregate({
+        where: { deletedAt: null },
+        _sum: { weightKg: true, bags: true },
+      }),
+      this.prisma.inventoryItem.findMany({ where: { deletedAt: null } }),
       this.prisma.donation.aggregate({
         _sum: { amount: true },
         where: { status: DonationStatus.COMPLETED },
       }),
     ]);
 
-    const lowStockCount = inventoryItems.filter((item) => item.quantity <= item.minimumStock).length;
+    const lowStockCount = inventoryItems.filter(
+      (item) => item.quantity <= item.minimumStock,
+    ).length;
 
     return {
       participantsCount,
@@ -55,10 +66,26 @@ export class DashboardService {
 
   async recentActivity() {
     const [schools, participants, events, reports] = await Promise.all([
-      this.prisma.school.findMany({ orderBy: { createdAt: 'desc' }, take: 5 }),
-      this.prisma.participant.findMany({ orderBy: { createdAt: 'desc' }, take: 5 }),
-      this.prisma.cleanupEvent.findMany({ orderBy: { createdAt: 'desc' }, take: 5 }),
-      this.prisma.weeklyReport.findMany({ orderBy: { createdAt: 'desc' }, take: 5 }),
+      this.prisma.school.findMany({
+        where: { deletedAt: null },
+        orderBy: { createdAt: 'desc' },
+        take: 5,
+      }),
+      this.prisma.participant.findMany({
+        where: { deletedAt: null },
+        orderBy: { createdAt: 'desc' },
+        take: 5,
+      }),
+      this.prisma.cleanupEvent.findMany({
+        where: { deletedAt: null },
+        orderBy: { createdAt: 'desc' },
+        take: 5,
+      }),
+      this.prisma.weeklyReport.findMany({
+        where: { deletedAt: null },
+        orderBy: { createdAt: 'desc' },
+        take: 5,
+      }),
     ]);
 
     const activity = [
@@ -76,7 +103,10 @@ export class DashboardService {
       })),
       ...events.map((e) => ({
         type: 'event' as const,
-        title: e.status === 'COMPLETED' ? 'Cleanup Event Completed' : 'Cleanup Event Scheduled',
+        title:
+          e.status === 'COMPLETED'
+            ? 'Cleanup Event Completed'
+            : 'Cleanup Event Scheduled',
         description: e.title,
         timestamp: e.createdAt,
       })),
