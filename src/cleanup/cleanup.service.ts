@@ -17,13 +17,23 @@ export class CleanupService {
 
   findAll() {
     return this.prisma.cleanupEvent.findMany({
+      where: { deletedAt: null },
       orderBy: { eventDate: 'desc' },
-      include: { community: true, _count: { select: { attendances: true, wasteRecords: true } } },
+      include: {
+        community: true,
+        _count: {
+          select: {
+            attendances: true,
+            wasteRecords: { where: { deletedAt: null } },
+          },
+        },
+      },
     });
   }
 
   async findOne(id: string) {
-    const event = await this.prisma.cleanupEvent.findFirst({ where: { id, deletedAt: null },
+    const event = await this.prisma.cleanupEvent.findFirst({
+      where: { id, deletedAt: null },
       include: {
         community: true,
         wasteRecords: true,
@@ -41,13 +51,19 @@ export class CleanupService {
     const { eventDate, ...rest } = dto;
     return this.prisma.cleanupEvent.update({
       where: { id },
-      data: { ...rest, ...(eventDate ? { eventDate: new Date(eventDate) } : {}) },
+      data: {
+        ...rest,
+        ...(eventDate ? { eventDate: new Date(eventDate) } : {}),
+      },
     });
   }
 
   async remove(id: string) {
     await this.ensureExists(id);
-    await this.prisma.cleanupEvent.update({ where: { id }, data: { deletedAt: new Date() } });
+    await this.prisma.cleanupEvent.update({
+      where: { id },
+      data: { deletedAt: new Date() },
+    });
     return { id };
   }
 
@@ -89,7 +105,9 @@ export class CleanupService {
   }
 
   private async ensureExists(id: string) {
-    const event = await this.prisma.cleanupEvent.findFirst({ where: { id, deletedAt: null } });
+    const event = await this.prisma.cleanupEvent.findFirst({
+      where: { id, deletedAt: null },
+    });
     if (!event) {
       throw new NotFoundException(`Cleanup event ${id} not found`);
     }
@@ -97,6 +115,9 @@ export class CleanupService {
 
   async restore(id: string) {
     await this.ensureExists(id);
-    return this.prisma.cleanupEvent.update({ where: { id }, data: { deletedAt: null } });
+    return this.prisma.cleanupEvent.update({
+      where: { id },
+      data: { deletedAt: null },
+    });
   }
 }
