@@ -13,13 +13,23 @@ export class CommunitiesService {
 
   findAll() {
     return this.prisma.community.findMany({
+      where: { deletedAt: null },
       orderBy: { name: 'asc' },
-      include: { _count: { select: { cleanupEvents: true, participants: true, schools: true } } },
+      include: {
+        _count: {
+          select: {
+            cleanupEvents: { where: { deletedAt: null } },
+            participants: { where: { deletedAt: null } },
+            schools: { where: { deletedAt: null } },
+          },
+        },
+      },
     });
   }
 
   async findOne(id: string) {
-    const community = await this.prisma.community.findFirst({ where: { id, deletedAt: null },
+    const community = await this.prisma.community.findFirst({
+      where: { id, deletedAt: null },
       include: { schools: true, participants: true },
     });
     if (!community) {
@@ -35,12 +45,17 @@ export class CommunitiesService {
 
   async remove(id: string) {
     await this.ensureExists(id);
-    await this.prisma.community.update({ where: { id }, data: { deletedAt: new Date() } });
+    await this.prisma.community.update({
+      where: { id },
+      data: { deletedAt: new Date() },
+    });
     return { id };
   }
 
   private async ensureExists(id: string) {
-    const community = await this.prisma.community.findFirst({ where: { id, deletedAt: null } });
+    const community = await this.prisma.community.findFirst({
+      where: { id, deletedAt: null },
+    });
     if (!community) {
       throw new NotFoundException(`Community ${id} not found`);
     }
@@ -48,6 +63,9 @@ export class CommunitiesService {
 
   async restore(id: string) {
     await this.ensureExists(id);
-    return this.prisma.community.update({ where: { id }, data: { deletedAt: null } });
+    return this.prisma.community.update({
+      where: { id },
+      data: { deletedAt: null },
+    });
   }
 }
