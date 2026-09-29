@@ -11,7 +11,6 @@ import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { SchoolsService } from './schools.service';
 import { CreateSchoolDto } from './dto/create-school.dto';
 import { UpdateSchoolDto } from './dto/update-school.dto';
-import { Public } from '../common/decorators/public.decorator';
 
 @ApiTags('schools')
 @ApiBearerAuth()
@@ -24,7 +23,6 @@ export class SchoolsController {
     return this.schoolsService.create(dto);
   }
 
-  @Public()
   @Get()
   findAll() {
     return this.schoolsService.findAll();
