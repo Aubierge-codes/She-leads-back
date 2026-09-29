@@ -1,9 +1,21 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+} from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { InventoryService } from './inventory.service';
 import { CreateInventoryItemDto } from './dto/create-inventory-item.dto';
 import { UpdateInventoryItemDto } from './dto/update-inventory-item.dto';
 import { CreateInventoryTransactionDto } from './dto/create-inventory-transaction.dto';
+import {
+  CurrentUser,
+  type AuthenticatedUser,
+} from '../common/decorators/current-user.decorator';
 
 @ApiTags('inventory')
 @Controller('inventory')
@@ -41,8 +53,12 @@ export class InventoryController {
   }
 
   @Post(':id/transactions')
-  recordTransaction(@Param('id') id: string, @Body() dto: CreateInventoryTransactionDto) {
-    return this.inventoryService.recordTransaction(id, dto);
+  recordTransaction(
+    @Param('id') id: string,
+    @Body() dto: CreateInventoryTransactionDto,
+    @CurrentUser() user: AuthenticatedUser,
+  ) {
+    return this.inventoryService.recordTransaction(id, dto, user.id);
   }
 
   @Post(':id/restore')
