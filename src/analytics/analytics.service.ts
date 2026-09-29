@@ -7,6 +7,7 @@ export class AnalyticsService {
 
   async wasteByType() {
     const grouped = await this.prisma.wasteRecord.groupBy({
+      where: { deletedAt: null },
       by: ['type'],
       _sum: { weightKg: true, bags: true },
     });
@@ -19,6 +20,7 @@ export class AnalyticsService {
 
   async participantsByStatus() {
     const grouped = await this.prisma.participant.groupBy({
+      where: { deletedAt: null },
       by: ['status'],
       _count: { _all: true },
     });
@@ -27,6 +29,7 @@ export class AnalyticsService {
 
   async cleanupEventsByStatus() {
     const grouped = await this.prisma.cleanupEvent.groupBy({
+      where: { deletedAt: null },
       by: ['status'],
       _count: { _all: true },
     });
@@ -38,11 +41,15 @@ export class AnalyticsService {
       by: ['type'],
       _sum: { quantity: true },
     });
-    return grouped.map((g) => ({ type: g.type, totalQuantity: g._sum.quantity ?? 0 }));
+    return grouped.map((g) => ({
+      type: g.type,
+      totalQuantity: g._sum.quantity ?? 0,
+    }));
   }
 
   async reportsByStatus() {
     const grouped = await this.prisma.weeklyReport.groupBy({
+      where: { deletedAt: null },
       by: ['status'],
       _count: { _all: true },
     });
@@ -55,6 +62,10 @@ export class AnalyticsService {
       _sum: { amount: true },
       _count: { _all: true },
     });
-    return grouped.map((g) => ({ status: g.status, totalAmount: g._sum.amount ?? 0, count: g._count._all }));
+    return grouped.map((g) => ({
+      status: g.status,
+      totalAmount: g._sum.amount ?? 0,
+      count: g._count._all,
+    }));
   }
 }
